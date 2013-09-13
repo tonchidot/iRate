@@ -1,3 +1,113 @@
+Version 1.8 beta
+
+- App store link works on iOS 7 (had to link to app home page instead of directly to reviews page for now - hopefully an alternative direct link can be found)
+- No longer requires StoreKit by default (see README for details)
+- Fixed Czech and Austrian German locales for iOS 7
+- Removed disableAlertViewResizing property (no longer needed)
+- Improved Czech translation
+- Urdu support
+- Now complies with the -Wextra warning level
+
+Version 1.7.5
+
+- Improved Arabic translation
+- Improved podspec file
+- Removed .DS_Store file
+
+Version 1.7.4
+
+- Added Arabic translation
+- Improved French translation
+- Added delegate method for tracking when prompt gets shown
+
+Version 1.7.3
+
+- Added Slovak, Czech and Austrian translations
+- Fixed some bugs in Cancel/Remind button disabling logic
+- Added podspec file
+
+Version 1.7.2
+
+- Added dutch translation
+- iRate now displays the StoreKit product view controller correctly even if a modally presented view controller has been displayed
+
+Version 1.7.1
+
+- Fixed deprecation warning when targeting iOS6 as the base target
+- Added iRateDidPresentStoreKitModal and iRateDidDismissStoreKitModal delegate methods
+- Added additional error logging if StoreKit fails to load product info
+- Added Ukranian translation
+
+Version 1.7
+
+- On iOS 6, iRate can now use the StoreKit APIs to display the product page directly within the app.
+- iRate now requires the StoreKit framework on iOS
+- iRate now requires ARC. To use iRate in a non-ARC project, follow the instructions in the README file.
+- Dropped support for 32-bit Macs running Snow Leopard
+- Added Swedish translation
+
+Version 1.6.2
+
+- Fixed broken ratings URL (Apple changed it)
+- Added Danish translation
+
+Version 1.6.1
+
+- Fixed typo in Italian strings file
+
+Version 1.6
+
+- Added new localisation system (see README for details)
+- Added usesPerWeekForPrompt setting
+- Fixed deprecation warning in iOS 6
+- Improved Spanish translation
+- Improved German translation
+
+Version 1.5.3
+
+- Corrected minor spelling mistake in German translation
+
+Version 1.5.2
+
+- Restored App Store deep link on iOS6 (didn't work in beta, but now does)
+- Added promptAgainForEachNewVersion option to enable/disable prompting each time the app is updated
+- Added verboseLogging option to make it easier to diagnose why a new version isn't being correctly detected
+- Renamed debug property to previewMode as this better describes its function
+- Add Simplified Chinese localisation
+
+Version 1.5.1
+
+- Fixed crash on iOS 4.x and Mac OS 10.6.x when compiled using Xcode 4.4
+
+Version 1.5
+
+- Added support for iOS6. Currently it does not appear to be possible to take users directly to the ratings page on iOS6, but iRate will now at least open the app store on the app page without an error.
+- Fixed bug in the app store country selection logic
+- Changed appStoreGenre to appStoreGenreID, as this is not locale-specific
+
+Version 1.4.9
+
+- Added support for sandboxed Mac App Store apps with no network access
+- Updated ARC Helper library
+
+Version 1.4.8
+
+- Added explicit 60-second timeout for connectivity check
+- iRate will now no longer spawn multiple download threads if closed and re-opened whilst performing a check
+- Added Portuguese translation
+
+Version 1.4.7
+
+- Fixed a bug where advanced properties set in the delegate methods might be subsequently overridden by iRate
+- Added Events Demo example
+
+Version 1.4.6
+
+- Fixed odd glitch where shaking device would cause UIAlertview to slowly shrink
+- Added disableAlertViewResizing option (see README for details)
+- Added Resizing Disabled example project
+- Added Korean translation
+
 Version 1.4.5
 
 - Improved German, Spanish, Japanese, Russian and Polish translations

@@ -1,6 +1,6 @@
 iRate
 
-Version 1.4.5, April 22nd, 2012
+Version 8 beta, August 28th, 2013
 
 Copyright (C) 2011 Charcoal Design
 

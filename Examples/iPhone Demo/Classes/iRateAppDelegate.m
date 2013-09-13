@@ -7,15 +7,10 @@
 //
 
 #import "iRateAppDelegate.h"
-#import "iRateViewController.h"
 #import "iRate.h"
 
 
 @implementation iRateAppDelegate
-
-@synthesize window;
-@synthesize viewController;
-
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -25,32 +20,17 @@
     //set the bundle ID. normally you wouldn't need to do this
     //as it is picked up automatically from your Info.plist file
     //but we want to test with an app that's actually on the store
-    [iRate sharedInstance].applicationBundleID = @"com.charcoaldesign.rainbowblocks-lite";
-	
-    //enable debug mode
-    [iRate sharedInstance].debug = YES;
+    [iRate sharedInstance].applicationBundleID = @"com.charcoaldesign.rainbowblocks-free";
+	[iRate sharedInstance].onlyPromptIfLatestVersion = NO;
+    
+    //enable preview mode
+    [iRate sharedInstance].previewMode = YES;
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(__unused UIApplication *)application didFinishLaunchingWithOptions:(__unused NSDictionary *)launchOptions
 {    
-    // Override point for customization after application launch.
-
-    // Add the view controller's view to the window and display.
-    [window addSubview:viewController.view];
-    [window makeKeyAndVisible];
-
+    [self.window makeKeyAndVisible];
     return YES;
 }
-
-#pragma mark -
-#pragma mark Memory management
-
-- (void)dealloc
-{
-    [viewController release];
-    [window release];
-    [super dealloc];
-}
-
 
 @end

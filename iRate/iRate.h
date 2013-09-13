@@ -1,15 +1,14 @@
 //
 //  iRate.h
 //
-//  Version 1.4.5
+//  Version 1.8 beta 3
 //
 //  Created by Nick Lockwood on 26/01/2011.
 //  Copyright 2011 Charcoal Design
 //
 //  Distributed under the permissive zlib license
-//  Get the latest version from either of these locations:
+//  Get the latest version from here:
 //
-//  http://charcoaldesign.co.uk/source/cocoa#irate
 //  https://github.com/nicklockwood/iRate
 //
 //  This software is provided 'as-is', without any express or implied
@@ -31,64 +30,18 @@
 //  3. This notice may not be removed or altered from any source distribution.
 //
 
-//
-//  ARC Helper
-//
-//  Version 1.3
-//
-//  Created by Nick Lockwood on 05/01/2012.
-//  Copyright 2012 Charcoal Design
-//
-//  Distributed under the permissive zlib license
-//  Get the latest version from here:
-//
-//  https://gist.github.com/1563325
-//
-
-#ifndef AH_RETAIN
-#if __has_feature(objc_arc)
-#define AH_RETAIN(x) (x)
-#define AH_RELEASE(x) (void)(x)
-#define AH_AUTORELEASE(x) (x)
-#define AH_SUPER_DEALLOC (void)(0)
-#define __AH_BRIDGE __bridge
-#else
-#define __AH_WEAK
-#define AH_WEAK assign
-#define AH_RETAIN(x) [(x) retain]
-#define AH_RELEASE(x) [(x) release]
-#define AH_AUTORELEASE(x) [(x) autorelease]
-#define AH_SUPER_DEALLOC [super dealloc]
-#define __AH_BRIDGE
-#endif
-#endif
-
-//  Weak reference support
-
-#ifndef AH_WEAK
-#if defined __IPHONE_OS_VERSION_MIN_REQUIRED
-#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_4_3
-#define __AH_WEAK __weak
-#define AH_WEAK weak
-#else
-#define __AH_WEAK __unsafe_unretained
-#define AH_WEAK unsafe_unretained
-#endif
-#elif defined __MAC_OS_X_VERSION_MIN_REQUIRED
-#if __MAC_OS_X_VERSION_MIN_REQUIRED > __MAC_10_6
-#define __AH_WEAK __weak
-#define AH_WEAK weak
-#else
-#define __AH_WEAK __unsafe_unretained
-#define AH_WEAK unsafe_unretained
-#endif
-#endif
-#endif
-
-//  ARC Helper ends
-
 
 #import <Availability.h>
+#undef weak_delegate
+#if __has_feature(objc_arc_weak) && \
+(!(defined __MAC_OS_X_VERSION_MIN_REQUIRED) || \
+__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_8)
+#define weak_delegate weak
+#else
+#define weak_delegate unsafe_unretained
+#endif
+
+
 #ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 #import <UIKit/UIKit.h>
 #else
@@ -96,7 +49,31 @@
 #endif
 
 
-extern NSString *const iRateAppStoreGenreGame;
+#if IRATE_USE_STOREKIT
+#import <StoreKit/StoreKit.h>
+#endif
+
+
+extern NSUInteger const iRateAppStoreGameGenreID;
+extern NSString *const iRateErrorDomain;
+
+
+//localisation string keys
+static NSString *const iRateMessageTitleKey = @"iRateMessageTitle";
+static NSString *const iRateAppMessageKey = @"iRateAppMessage";
+static NSString *const iRateGameMessageKey = @"iRateGameMessage";
+static NSString *const iRateCancelButtonKey = @"iRateCancelButton";
+static NSString *const iRateRemindButtonKey = @"iRateRemindButton";
+static NSString *const iRateRateButtonKey = @"iRateRateButton";
+
+
+typedef enum
+{
+    iRateErrorBundleIdDoesNotMatchAppStore = 1,
+    iRateErrorApplicationNotFoundOnAppStore,
+    iRateErrorApplicationIsNotLatestVersion
+}
+iRateErrorCode;
 
 
 @protocol iRateDelegate <NSObject>
@@ -105,44 +82,18 @@ extern NSString *const iRateAppStoreGenreGame;
 - (void)iRateCouldNotConnectToAppStore:(NSError *)error;
 - (void)iRateDidDetectAppUpdate;
 - (BOOL)iRateShouldPromptForRating;
+- (void)iRateDidPromptForRating;
 - (void)iRateUserDidAttemptToRateApp;
 - (void)iRateUserDidDeclineToRateApp;
 - (void)iRateUserDidRequestReminderToRateApp;
+- (BOOL)iRateShouldOpenAppStore;
+- (void)iRateDidPresentStoreKitModal;
+- (void)iRateDidDismissStoreKitModal;
 
 @end
 
 
 @interface iRate : NSObject
-
-//required for 32-bit Macs
-#ifdef __i386
-{
-@private
-    
-    NSUInteger appStoreID;
-    NSString *appStoreGenre;
-    NSString *appStoreCountry;
-    NSString *applicationName;
-    NSString *applicationVersion;
-    NSString *applicationBundleID;
-    NSUInteger usesUntilPrompt;
-    NSUInteger eventsUntilPrompt;
-    float daysUntilPrompt;
-    float remindPeriod;
-    NSString *messageTitle;
-    NSString *message;
-    NSString *cancelButtonLabel;
-    NSString *remindButtonLabel;
-    NSString *rateButtonLabel;
-    NSURL *ratingsURL;
-    BOOL onlyPromptIfLatestVersion;
-    BOOL onlyPromptIfMainWindowIsAvailable;
-    BOOL promptAtLaunch;
-    BOOL debug;
-    id<iRateDelegate> __AH_WEAK delegate;
-    id visibleAlert;
-}
-#endif
 
 + (iRate *)sharedInstance;
 
@@ -151,7 +102,7 @@ extern NSString *const iRateAppStoreGenreGame;
 @property (nonatomic, assign) NSUInteger appStoreID;
 
 //application details - these are set automatically
-@property (nonatomic, copy) NSString *appStoreGenre;
+@property (nonatomic, assign) NSUInteger appStoreGenreID;
 @property (nonatomic, copy) NSString *appStoreCountry;
 @property (nonatomic, copy) NSString *applicationName;
 @property (nonatomic, copy) NSString *applicationVersion;
@@ -161,9 +112,10 @@ extern NSString *const iRateAppStoreGenreGame;
 @property (nonatomic, assign) NSUInteger usesUntilPrompt;
 @property (nonatomic, assign) NSUInteger eventsUntilPrompt;
 @property (nonatomic, assign) float daysUntilPrompt;
+@property (nonatomic, assign) float usesPerWeekForPrompt;
 @property (nonatomic, assign) float remindPeriod;
 
-//message text, you may wish to customise these, e.g. for localisation
+//message text, you may wish to customise these
 @property (nonatomic, copy) NSString *messageTitle;
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *cancelButtonLabel;
@@ -171,10 +123,13 @@ extern NSString *const iRateAppStoreGenreGame;
 @property (nonatomic, copy) NSString *rateButtonLabel;
 
 //debugging and prompt overrides
+@property (nonatomic, assign) BOOL useAllAvailableLanguages;
+@property (nonatomic, assign) BOOL promptAgainForEachNewVersion;
 @property (nonatomic, assign) BOOL onlyPromptIfLatestVersion;
 @property (nonatomic, assign) BOOL onlyPromptIfMainWindowIsAvailable;
 @property (nonatomic, assign) BOOL promptAtLaunch;
-@property (nonatomic, assign) BOOL debug;
+@property (nonatomic, assign) BOOL verboseLogging;
+@property (nonatomic, assign) BOOL previewMode;
 
 //advanced properties for implementing custom behaviour
 @property (nonatomic, strong) NSURL *ratingsURL;
@@ -182,9 +137,12 @@ extern NSString *const iRateAppStoreGenreGame;
 @property (nonatomic, strong) NSDate *lastReminded;
 @property (nonatomic, assign) NSUInteger usesCount;
 @property (nonatomic, assign) NSUInteger eventCount;
+@property (nonatomic, readonly) float usesPerWeek;
 @property (nonatomic, assign) BOOL declinedThisVersion;
+@property (nonatomic, readonly) BOOL declinedAnyVersion;
 @property (nonatomic, assign) BOOL ratedThisVersion;
-@property (nonatomic, AH_WEAK) id<iRateDelegate> delegate;
+@property (nonatomic, readonly) BOOL ratedAnyVersion;
+@property (nonatomic, weak_delegate) id<iRateDelegate> delegate;
 
 //manually control behaviour
 - (BOOL)shouldPromptForRating;

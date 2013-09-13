@@ -8,9 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface iRateViewController : UIViewController {
+@interface iRateViewController : UIViewController
 
-}
+- (IBAction)logEvent;
 
 @end
 
